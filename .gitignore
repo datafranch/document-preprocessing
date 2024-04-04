@@ -331,3 +331,4 @@ $RECYCLE.BIN/
 
 /text-clean-env
 datasets/
+.idea/
