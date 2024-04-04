@@ -1,0 +1,110 @@
+{
+  "displayName": "PDF to Image application",
+  "name": "pdf_item_to_images",
+  "scope": "project",
+  "version": "0.0.1",
+  "description": "An application for converting PDF to Image items",
+  "attributes": {
+    "Provider": "Dataloop",
+    "Category": "Pipeline",
+    "Pipeline Type": "Node",
+    "Node Type": "Other"
+  },
+  "components": {
+    "pipelineNodes": [
+      {
+        "invoke": {
+          "type": "function",
+          "namespace": "pdf-to-image-v2.pdf_to_image_v2.pdf_item_to_images"
+        },
+        "name": "pdf-to-image",
+        "displayName": "PDF to Image",
+        "description": "Converting PDF to Image items",
+        "scope": "node",
+        "configuration": {
+          "fields": [
+            {
+              "name": "name",
+              "title": "Node Name",
+              "props": {
+                "title": true,
+                "type": "string",
+                "default": "PDF-to-Image",
+                "required": true,
+                "placeholder": "Insert node name"
+              },
+              "rules": [
+                {
+                  "type": "required",
+                  "effect": "error"
+                }
+              ],
+              "widget": "dl-input"
+            },
+            {
+              "name": "apply_modality",
+              "title": "apply modality",
+              "props": {
+                "type": "boolean",
+                "title": true,
+                "required": true
+              },
+              "rules": [
+                {
+                  "type": "required",
+                  "effect": "error"
+                }
+              ],
+              "widget": "dl-checkbox"
+            }
+          ]
+        }
+      }
+    ],
+    "modules": [
+      {
+        "name": "pdf_to_image_v2",
+        "entryPoint": "modules/pdf_to_image/pdf-to-image.py",
+        "className": "ServiceRunner",
+        "initInputs": [],
+        "functions": [
+          {
+            "name": "pdf_item_to_images",
+            "input": [
+              {
+                "type": "Item",
+                "name": "item"
+              }
+            ],
+            "output": [
+              {
+                "type": "Item",
+                "name": "item"
+              }
+            ],
+            "displayIcon": "icon-dl-item-filled",
+            "displayName": "PDF item to images"
+          }
+        ]
+      }
+    ],
+    "services": [
+      {
+        "name": "pdf-to-image-v2",
+        "moduleName": "pdf_to_image_v2",
+        "secrets": [
+        ],
+        "runtime": {
+          "podType": "regular-s",
+          "concurrency": 10,
+          "autoscaler": {
+            "minReplicas": 0,
+            "maxReplicas": 2,
+            "queueLength": 10
+          }
+        },
+        "operation": "none"
+      }
+    ]
+  }
+}

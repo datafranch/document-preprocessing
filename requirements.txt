@@ -1,0 +1,5 @@
+"unstructured[all-docs]"
+PyPDF2
+autocorrect
+PyMuPDF
+langchain
