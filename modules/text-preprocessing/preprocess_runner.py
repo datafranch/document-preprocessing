@@ -3,16 +3,18 @@ import logging
 import os
 from typing import List
 from functools import partial
-from autocorrect import Speller
 from concurrent.futures import ThreadPoolExecutor
 import time
 from tqdm import tqdm
 
 from unstructured.partition.text import partition_text
-from unstructured.cleaners.core import bytes_string_to_string, replace_unicode_quotes, clean, clean_non_ascii_chars, \
+from unstructured.cleaners.core import replace_unicode_quotes, clean, clean_non_ascii_chars, \
     clean_ordered_bullets, group_broken_paragraphs, remove_punctuation
 from unstructured.documents.elements import Text
+import nltk
 
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 logger = logging.getLogger('text-preprocess-logger')
 
 
@@ -24,14 +26,17 @@ class PreprocessorRunner(dl.BaseServiceRunner):
     """
 
     @staticmethod
-    def preprocess_text(items: [dl.Item], to_spell: bool) -> List[dl.Item]:
+    def preprocess_text(items: [dl.Item], context: dl.Context) -> List[dl.Item]:
         """
         The main function for the preprocessing process of a Dataloop item, text file contain a chunk of the original
         text file (pdf in this case).
         :param items: a list of Dataloop items, text file
-        :param to_spell: Whether to spell the text using autocorrect
+        :param context: Dataloop context to set whether to spell the text using autocorrect
         :return: A list of clean chunk items.
         """
+        node = context.node
+        to_spell = node.metadata['customNodeConfig']['to_spell']
+
         # Download path - original items
         local_path = os.path.join(os.getcwd(), 'datasets', items[0].dataset.id, 'text_files')
         os.makedirs(local_path, exist_ok=True)
@@ -84,8 +89,6 @@ class PreprocessorRunner(dl.BaseServiceRunner):
                                    lowercase=True)  # Lowercase the output
 
         cleaners = [cleaner1_partial,
-                    # Converts an output string that looks like a byte string to a string using the specified encoding.
-                    bytes_string_to_string,
                     # Replaces unicode quote characters in strings
                     replace_unicode_quotes,
                     # Removes non-ascii characters from a string.
@@ -94,7 +97,8 @@ class PreprocessorRunner(dl.BaseServiceRunner):
                     clean_ordered_bullets,
                     # Groups together paragraphs that are broken up with line breaks
                     group_broken_paragraphs,
-                    remove_punctuation  # Removes ASCII and unicode punctuation from a string.
+                    # Removes ASCII and unicode punctuation from a string.
+                    remove_punctuation
                     ]
 
         item_local_path = os.path.join(local_path, os.path.dirname(item.filename[1:]))
@@ -109,12 +113,13 @@ class PreprocessorRunner(dl.BaseServiceRunner):
             element.apply(*cleaners)
             logger.info("Applied cleaning methods")
             if to_spell:
+                from autocorrect import Speller
                 spell = Speller(lang='en')
                 clean_text = spell(element.text)
                 text += clean_text + ''
                 logger.info("Applied autocorrect spelling")
             else:
-                text += element.text
+                text += element.text + ' '
 
         # Save
         # each chunk as separated text file

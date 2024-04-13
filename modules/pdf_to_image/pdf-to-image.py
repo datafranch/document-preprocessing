@@ -11,17 +11,19 @@ logger = logging.getLogger(name=__name__)
 
 class ServiceRunner(dl.BaseServiceRunner):
     """
-    This Service contain functions for converting pdf dataloop item to an image dataloop item.
+    This Service contains functions for converting pdf dataloop item to an image dataloop item.
     """
 
     @staticmethod
-    def pdf_item_to_images(item: dl.Item, apply_modality: bool) -> List[dl.Item]:
+    def pdf_item_to_images(item: dl.Item, context: dl.Context) -> List[dl.Item]:
         """
         Convert pdf dataloop item to an image item.
         :param item: pdf dataloop item.
-        :param apply_modality: specify if to use replace modality for visualize the item in the platform.
+        :param context: Dataloop context to set if to use replace modality for visualize the item in the platform.
         :return:
         """
+        node = context.node
+        apply_modality = node.metadata['customNodeConfig']['apply_modality']
 
         suffix = Path(item.name).suffix
         if not suffix == '.pdf':
@@ -34,20 +36,22 @@ class ServiceRunner(dl.BaseServiceRunner):
 
         images_paths = ServiceRunner.convert_pdf_to_image(file_path=item_local_path)
 
+        logger.info(f"Total of {len(images_paths)} images were created")
         # Uploading all created items - upload bulk
         img_items = item.dataset.items.upload(local_path=images_paths,
+                                              remote_path='/images-files',
                                               item_metadata={
                                                   'user': {'converted_to_image': True, 'original_item_id': item.id}}
                                               )
 
-        if isinstance(img_items, dl.Item):
-            img_items = [img_items]
+        # Uploader returns generator or a single item
+        if not isinstance(img_items, dl.Item):
+            first_item = next((item for item in img_items if item.name.endswith('0.png')))
         else:
-            img_items = [item for item in img_items]
+            first_item = img_items
 
         if apply_modality:
             # if the pdf contain more than 1 page, only the first image will serve as preview modality.
-            first_item = img_items[0]
             ServiceRunner.apply_modality(item=item, ref_item=first_item)
 
         return img_items
@@ -79,7 +83,7 @@ class ServiceRunner(dl.BaseServiceRunner):
 
             # Save the image to a file
             image.save(image_filename)
-            paths.append(images_path)
+            paths.append(image_filename)
 
         # Close the PDF document
         pdf_document.close()
@@ -101,15 +105,15 @@ class ServiceRunner(dl.BaseServiceRunner):
 
 
 if __name__ == '__main__':
-    # dl.setenv('rc')
+    dl.setenv('rc')
     # project = dl.projects.get(project_name="text-project")
     # dataset = project.datasets.get(dataset_name="mortgage-dataset")
     # item = dataset.items.get(item_id='65f9984b6861c61ce19447d9')
 
-    dl.setenv('prod')
-    project = dl.projects.get(project_name='text-project')
-    dataset = project.datasets.get(dataset_name='mortgage-data')
-    item = dataset.items.get(item_id='660e92f3aadac655647713e9')
-
-    s = ServiceRunner()
-    s.pdf_item_to_images(item=item, apply_modality=True)
+    # dl.setenv('prod')
+    # project = dl.projects.get(project_name='text-project')
+    # dataset = project.datasets.get(dataset_name='mortgage-data')
+    # item = dataset.items.get(item_id='660e92f3aadac605ee7713db')
+    #
+    # s = ServiceRunner()
+    # s.pdf_item_to_images(item=item)

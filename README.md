@@ -1,8 +1,8 @@
-# Text preprocessing Applications
+# PDF Conversion preprocessing Applications
 
 ## Introduction
 
-This repo is an application's pipeline nodes for preprocess textual data in dataloop platform.
+This repo is an application's pipeline nodes for preprocess PDF data in dataloop platform.
 It also include integration between [Unstructured io](https://unstructured-io.github.io/unstructured/index.html#)
 functions and [Dataloop](https://dataloop.ai/). The Unstructured library is crafted to facilitate the preprocessing and structuring of unstructured text documents, 
 enabling their utilization in subsequent machine learning endeavors. It supports various document formats such as PDFs, 
@@ -17,15 +17,15 @@ tasks.
 
 The proposed pipeline nodes:
 
-* ```PDF to Image Converter``` -  This app serves as pipeline node. Can be used if the user want to convert PDF data 
+* ```PDF to Images``` -  This app serves as pipeline node. Can be used if the user want to convert PDF data 
 to images. by that it can be visualized in the platform and also can be appropriate for using computer vision models.
 
 
-* ```PDF to Text Converter``` - This app serves as pipeline node. Can be used if the user want to convert PDF data 
+* ```PDF to Text``` - This app serves as pipeline node. Can be used if the user want to convert PDF data 
 to text files. By that it can be visualized in the platform and also can be appropriate for using several LLM/NLP models.
 
 
-* ```Prepossesing PDF``` - This app serves as pipeline node. This app preprocess 
+* ```Text Preprocessing``` - This app serves as pipeline node. This app preprocess 
 PDFs dataset to create clean text files. This files can be an input for nlp model or to be converted to prompt input.
 
 In the future, the same applications will be available for different types of textual files such as: HTML, eml (email), jsons and so on.

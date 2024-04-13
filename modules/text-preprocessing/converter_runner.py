@@ -3,7 +3,7 @@ import logging
 from typing import List
 import os
 from pathlib import Path
-import PyPDF2
+import pypdf
 import nltk
 
 nltk.download('punkt')
@@ -19,17 +19,20 @@ class ConvertorRunner(dl.BaseServiceRunner):
     """
 
     @staticmethod
-    def pdf_item_to_text(item: dl.Item, chunking_strategy: str, max_chunk_size: int, chunk_overlap: int) \
-            -> List[dl.Item]:
+    def pdf_item_to_text(item: dl.Item, context: dl.Context) -> List[dl.Item]:
         """
         The main function for extracting pdf item and saving text files for each chunk.
 
-        :param chunk_overlap:
-        :param chunking_strategy:
+        :param context: Dataloop context to set the method to chunk by,  maximum size of each chunk and
+        maximum overlap between two chunks.
         :param item: Dataloop item, pdf file
-        :param max_chunk_size: Maximum number of words in each extracted text file.
         :return: New text items paths (list)
         """
+        node = context.node
+        chunking_strategy = node.metadata['customNodeConfig']['chunking_strategy']
+        max_chunk_size = node.metadata['customNodeConfig']['max_chunk_size']
+        chunk_overlap = node.metadata['customNodeConfig']['chunk_overlap']
+
         suffix = Path(item.name).suffix
         if not suffix == '.pdf':
             raise dl.PlatformException(f"Item id : {item.id} is not a PDF file! This functions excepts pdf only")
@@ -128,7 +131,7 @@ class ConvertorRunner(dl.BaseServiceRunner):
         :return: string of the extracted text
         """
         open_file = open(pdf_path, 'rb')
-        ind_manifesto = PyPDF2.PdfReader(open_file)
+        ind_manifesto = pypdf.PdfReader(open_file)
         logger.info(f"Pdf metadate: {ind_manifesto.metadata}")
 
         total_pages = len(ind_manifesto.pages)

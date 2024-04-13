@@ -1,8 +1,8 @@
 {
-  "displayName": "PDF to Image application",
-  "name": "pdf_item_to_images",
+  "displayName": "PDF to Images",
+  "name": "pdf_to_images",
   "scope": "project",
-  "version": "0.0.1",
+  "version": "0.0.27",
   "description": "An application for converting PDF to Image items",
   "attributes": {
     "Provider": "Dataloop",
@@ -18,6 +18,9 @@
           "namespace": "pdf-to-image-v2.pdf_to_image_v2.pdf_item_to_images"
         },
         "name": "pdf-to-image",
+        "categories": [
+          "Text-Preprocessing"
+        ],
         "displayName": "PDF to Image",
         "description": "Converting PDF to Image items",
         "scope": "node",
@@ -47,14 +50,8 @@
               "props": {
                 "type": "boolean",
                 "title": true,
-                "required": true
+                "default": false
               },
-              "rules": [
-                {
-                  "type": "required",
-                  "effect": "error"
-                }
-              ],
               "widget": "dl-checkbox"
             }
           ]
@@ -95,7 +92,8 @@
         "secrets": [
         ],
         "runtime": {
-          "podType": "regular-s",
+          "podType": "regular-m",
+          "runnerImage": "dataloopai/dtlpy-agent:cpu.py3.8.pytorch2",
           "concurrency": 10,
           "autoscaler": {
             "minReplicas": 0,

@@ -332,3 +332,5 @@ $RECYCLE.BIN/
 /text-clean-env
 datasets/
 .idea/
+.dataloop/
+/modules/text-preprocessing/test_services.py
