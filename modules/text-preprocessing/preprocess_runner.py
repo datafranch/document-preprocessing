@@ -1,20 +1,20 @@
-import dtlpy as dl
-import logging
-import os
-from typing import List
-from functools import partial
-from concurrent.futures import ThreadPoolExecutor
-import time
-from tqdm import tqdm
-
-from unstructured.partition.text import partition_text
 from unstructured.cleaners.core import replace_unicode_quotes, clean, clean_non_ascii_chars, \
     clean_ordered_bullets, group_broken_paragraphs, remove_punctuation
+from unstructured.partition.text import partition_text
+from concurrent.futures import ThreadPoolExecutor
 from unstructured.documents.elements import Text
+from autocorrect import Speller
+from functools import partial
+from typing import List
+from tqdm import tqdm
+import dtlpy as dl
+import logging
+import time
 import nltk
+import os
 
-nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
+nltk.download('punkt')
 logger = logging.getLogger('text-preprocess-logger')
 
 
@@ -112,8 +112,7 @@ class PreprocessorRunner(dl.BaseServiceRunner):
             element = Text(element.text)
             element.apply(*cleaners)
             logger.info("Applied cleaning methods")
-            if to_spell:
-                from autocorrect import Speller
+            if to_spell is True:
                 spell = Speller(lang='en')
                 clean_text = spell(element.text)
                 text += clean_text + ''
@@ -135,9 +134,13 @@ class PreprocessorRunner(dl.BaseServiceRunner):
                                                      remote_path='/unstructured_io_text_files',
                                                      # TODO: add another cleaning library
                                                      item_metadata={
-                                                         'user': {'chunk_to_text': True,
-                                                                  'original_item_id': original_id,
-                                                                  'original_chunk_id': item.id}})
+                                                         'user': {'prepossess_chunk': {'clean_chunk': True,
+                                                                                       'original_item_id': original_id,
+                                                                                       'original_chunk_id': item.id}}})
         pbar.update()
+
+        # Remove local files
+        os.remove(textfile_path)
+        os.remove(chunkfile_path)
 
         return clean_chunk_item

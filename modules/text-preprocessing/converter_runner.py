@@ -1,14 +1,13 @@
+from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
+from pathlib import Path
+from typing import List
 import dtlpy as dl
 import logging
-from typing import List
-import os
-from pathlib import Path
 import pypdf
 import nltk
+import os
 
 nltk.download('punkt')
-from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
-
 logger = logging.getLogger('pdf-to-text-logger')
 
 
@@ -28,10 +27,13 @@ class ConvertorRunner(dl.BaseServiceRunner):
         :param item: Dataloop item, pdf file
         :return: New text items paths (list)
         """
-        node = context.node
-        chunking_strategy = node.metadata['customNodeConfig']['chunking_strategy']
-        max_chunk_size = node.metadata['customNodeConfig']['max_chunk_size']
-        chunk_overlap = node.metadata['customNodeConfig']['chunk_overlap']
+        # node = context.node
+        # chunking_strategy = node.metadata['customNodeConfig']['chunking_strategy']
+        # max_chunk_size = node.metadata['customNodeConfig']['max_chunk_size']
+        # chunk_overlap = node.metadata['customNodeConfig']['chunk_overlap']
+        chunking_strategy = 'nltk-paragraphs'
+        max_chunk_size = 300
+        chunk_overlap = 20
 
         suffix = Path(item.name).suffix
         if not suffix == '.pdf':
@@ -69,14 +71,27 @@ class ConvertorRunner(dl.BaseServiceRunner):
         # Uploading all created items - bulk
         crafted_items = item.dataset.items.upload(local_path=text_files_paths,
                                                   remote_path='/text_files',
-                                                  item_metadata={'user': {'converted_to_text': True,
-                                                                          'original_item_id': item.id}}
+                                                  item_metadata={'user': {'pdf_to_text': {'converted_to_text': True,
+                                                                                          'original_item_id': item.id}}}
                                                   )
 
-        if isinstance(crafted_items, dl.Item):
+        if crafted_items is None:
+            crafted_items = []
+        elif isinstance(crafted_items, dl.Item):
             crafted_items = [crafted_items]
         else:
             crafted_items = [item for item in crafted_items]
+
+        # Remove local files:
+        for file_path in text_files_paths:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"{file_path} removed")
+            else:
+                print(f"{file_path} does not exist")
+
+        # os.remove(item_local_path)
+
         return crafted_items
 
     @staticmethod
