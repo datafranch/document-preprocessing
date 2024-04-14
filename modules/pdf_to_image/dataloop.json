@@ -2,7 +2,7 @@
   "displayName": "PDF to Images",
   "name": "pdf_to_images",
   "scope": "project",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "description": "An application for converting PDF to Image items",
   "attributes": {
     "Provider": "Dataloop",
@@ -93,7 +93,7 @@
         ],
         "runtime": {
           "podType": "regular-m",
-          "runnerImage": "dataloopai/dtlpy-agent:cpu.py3.8.pytorch2",
+          "runnerImage": "dataloopai/dtlpy-agent:cpu.py3.10.opencv",
           "concurrency": 10,
           "autoscaler": {
             "minReplicas": 0,
