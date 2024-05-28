@@ -75,6 +75,7 @@ class ConvertorRunner(dl.BaseServiceRunner):
                                                                                           'original_item_id': item.id}}}
                                                   )
 
+        # TODO: RAISE IF NONE
         if crafted_items is None:
             crafted_items = []
         elif isinstance(crafted_items, dl.Item):
@@ -90,7 +91,7 @@ class ConvertorRunner(dl.BaseServiceRunner):
             else:
                 print(f"{file_path} does not exist")
 
-        # os.remove(item_local_path)
+        # os.remove(item_local_path) # TODO:
 
         return crafted_items
 

@@ -115,7 +115,7 @@ class ServiceRunner(dl.BaseServiceRunner):
                                name='reference-viewer',
                                mimetype=ref_item.mimetype,
                                ref=ref_item.id)
-        item.update(system_metadata=True)
+        item.update(system_metadata=True)  # TODO : IS IT NEEDED?
 
 
 if __name__ == '__main__':
